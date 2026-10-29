@@ -1,0 +1,52 @@
+.section-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  box-shadow: 0 14px 35px rgb(20 61 67 / 6%);
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 1.2rem;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 0.45rem 0;
+  color: var(--color-ink);
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+}
+
+p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.count {
+  flex: none;
+  padding: 0.45rem 0.7rem;
+  border-radius: 2rem;
+  background: #e9f4f1;
+  color: var(--color-primary-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .section-heading {
+    flex-direction: column;
+    padding: 1.2rem;
+  }
+}

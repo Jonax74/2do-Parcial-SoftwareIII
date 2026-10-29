@@ -1,0 +1,14 @@
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+label {
+  color: var(--color-ink);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.error {
+  color: var(--color-danger);
+}

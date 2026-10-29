@@ -1,0 +1,57 @@
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+th {
+  background: #f3f8f7;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+tbody tr {
+  animation: appear 260ms ease both;
+}
+
+tbody tr:hover {
+  background: #f8fbfa;
+}
+
+.empty {
+  padding: 2rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  th,
+  td {
+    padding: 0.8rem;
+  }
+}
