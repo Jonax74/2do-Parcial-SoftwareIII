@@ -10,27 +10,29 @@ import { ButtonComponent } from '../../atoms/button/button.component';
   template: `
     <div class="shell">
       <header class="site-header">
-        <a class="brand" routerLink="/pacientes" aria-label="Clínica Piedra Azul, inicio">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 48 48" role="img">
-              <path d="M20 8h8v12h12v8H28v12h-8V28H8v-8h12z" />
-            </svg>
+        <a class="brand" routerLink="/medicos" aria-label="Clínica Piedra Azul, inicio">
+          <span class="brand-mark">
+            <img src="/images/clinica-symbol.png" alt="" />
           </span>
           <span class="brand-copy">
             <strong>Clínica Piedra Azul</strong>
-            <small>Salud y cuidado cercano</small>
+            <small>Tu salud, nuestra prioridad</small>
           </span>
         </a>
         <nav aria-label="Navegación principal">
-          <a routerLink="/pacientes" routerLinkActive="active">Pacientes</a>
           @if (auth.isAuthenticated()) {
             @if (auth.role() === 'ADMINISTRADOR') {
-              <a routerLink="/admin/pacientes" routerLinkActive="active">Administración</a>
-              <a routerLink="/admin/usuarios/nuevo" routerLinkActive="active">Registrar usuario</a>
+              <a routerLink="/admin/medicos" routerLinkActive="active">Médicos</a>
+              <a routerLink="/admin/pacientes" routerLinkActive="active">Pacientes</a>
+              <a routerLink="/admin/citas" routerLinkActive="active">Citas</a>
+            }
+            @if (auth.role() === 'PACIENTE') {
+              <a routerLink="/medicos" routerLinkActive="active">Médicos</a>
+              <a routerLink="/paciente/citas" routerLinkActive="active">Mis citas</a>
             }
             <pa-button variant="secondary" (click)="logout()">Cerrar sesión</pa-button>
           } @else {
-            <a routerLink="/registro" routerLinkActive="active">Crear cuenta</a>
+            <a routerLink="/medicos" routerLinkActive="active">Médicos</a>
             <a class="login-link" routerLink="/login" routerLinkActive="active">Iniciar sesión</a>
           }
         </nav>
@@ -41,8 +43,12 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       </main>
 
       <footer>
-        <span>Clínica Piedra Azul</span>
-        <span>Atención con confianza, siempre.</span>
+        <div class="footer-brand">
+          <img src="/images/clinica-symbol.png" alt="" />
+          <span>Clínica Piedra Azul</span>
+        </div>
+        <span>Atención cercana, con confianza y cuidado.</span>
+        <span class="footer-location">Popayán · Cauca</span>
       </footer>
     </div>
   `,
@@ -54,6 +60,6 @@ export class AppShellComponent {
 
   logout(): void {
     this.auth.logout();
-    void this.router.navigateByUrl('/login');
+    void this.router.navigateByUrl('/medicos');
   }
 }

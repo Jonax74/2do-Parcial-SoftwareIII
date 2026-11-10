@@ -3,14 +3,13 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
 import { UserRegistrationFormComponent } from '../../shared/organisms/user-registration-form/user-registration-form.component';
 
 @Component({
-  selector: 'pa-register-page',
+  selector: 'pa-admin-patient-register-page',
   standalone: true,
   imports: [AppShellComponent, UserRegistrationFormComponent],
   template: `
     <pa-app-shell>
-      <pa-user-registration-form />
+      <pa-user-registration-form [adminMode]="true" [patientOnly]="true" />
     </pa-app-shell>
   `,
 })
-export class RegisterPageComponent {
-}
+export class AdminPatientRegisterPageComponent {}

@@ -36,7 +36,7 @@ describe('route guards', () => {
     const result = runGuard(roleGuard, { role: 'ADMINISTRADOR' });
 
     expect(result).toBeInstanceOf(UrlTree);
-    expect(router.serializeUrl(result as UrlTree)).toBe('/pacientes');
+    expect(router.serializeUrl(result as UrlTree)).toBe('/medicos');
   });
 
   function runGuard(

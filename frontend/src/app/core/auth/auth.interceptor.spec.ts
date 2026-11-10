@@ -35,9 +35,9 @@ describe('authInterceptor', () => {
 
   it('does not attach a bearer token to public requests', () => {
     session.save('signed-token', 'PACIENTE');
-    http.get('/api/pacientes/publico').subscribe();
+    http.get('/api/medicos/publico').subscribe();
 
-    const request = httpTesting.expectOne('/api/pacientes/publico');
+    const request = httpTesting.expectOne('/api/medicos/publico');
     expect(request.request.headers.has('Authorization')).toBe(false);
     request.flush([]);
   });

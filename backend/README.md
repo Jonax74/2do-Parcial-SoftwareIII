@@ -45,13 +45,19 @@ La API escucha en `http://localhost:8080`. La conexión se puede cambiar mediant
 
 | Método y ruta | Acceso | Descripción |
 | --- | --- | --- |
-| `POST /api/auth/register` | Público | Registra un paciente y su perfil |
 | `POST /api/auth/login` | Público | Valida credenciales y entrega el JWT |
+| `GET /api/medicos/publico` | Público | Lista nombre, especialidad y contacto de médicos |
+| `POST /api/admin/medicos` | Administrador | Registra un médico |
+| `GET /api/admin/medicos` | Administrador | Lista médicos para administración |
+| `POST /api/admin/pacientes` | Administrador | Registra un paciente |
+| `GET /api/admin/pacientes/existe?documento=...` | Administrador | Comprueba si una cédula ya está registrada |
+| `GET /api/admin/citas` | Administrador | Lista todas las citas |
+| `POST /api/admin/citas` | Administrador | Crea una cita para un paciente y médico existentes |
+| `GET /api/paciente/citas` | Paciente | Lista las citas del usuario autenticado |
 | `POST /api/admin/usuarios` | Administrador | Registra otro administrador o un paciente |
-| `GET /api/pacientes/publico` | Público | Devuelve únicamente nombre y documento |
 | `GET /api/admin/pacientes` | Administrador | Devuelve el listado administrativo |
 
-El endpoint público asigna siempre el rol `PACIENTE`; ignora cualquier intento de elegir otro rol.
+El registro de pacientes requiere una sesión administrativa y siempre asigna el rol `PACIENTE`.
 La creación de administradores requiere una sesión administrativa. Para crear el primero, se usa
 el bootstrap por variables de entorno. Los correos se normalizan y se rechazan duplicados; la
 contraseña se almacena con BCrypt. Un login incorrecto responde `401`; el acceso administrativo

@@ -1,10 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthResponse } from '../../core/auth/auth.models';
+import { nonBlank } from '../../core/forms/form-validators';
 import { ButtonComponent } from '../../shared/atoms/button/button.component';
 import { FormFieldComponent } from '../../shared/molecules/form-field/form-field.component';
 import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.component';
@@ -12,12 +12,14 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
 @Component({
   selector: 'pa-login-page',
   standalone: true,
-  imports: [AppShellComponent, ButtonComponent, FormFieldComponent, ReactiveFormsModule, RouterLink],
+  imports: [AppShellComponent, ButtonComponent, FormFieldComponent, ReactiveFormsModule],
   template: `
     <pa-app-shell>
       <section class="login-layout">
         <div class="welcome-panel">
-          <span class="welcome-icon" aria-hidden="true">✚</span>
+          <span class="welcome-icon">
+            <img src="/images/clinica-symbol.png" alt="" />
+          </span>
           <span class="eyebrow">Bienvenido a Piedra Azul</span>
           <h1>Cuidamos de ti en cada etapa.</h1>
           <p>
@@ -41,8 +43,9 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
               type="email"
               placeholder="nombre@correo.com"
               autocomplete="username"
+              [maxLength]="150"
               [control]="form.controls.correo"
-              validationMessage="Ingresa un correo electrónico válido."
+              validationMessage="Ingresa un correo válido de máximo 150 caracteres."
             />
             <pa-form-field
               inputId="password"
@@ -50,8 +53,9 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
               type="password"
               placeholder="Tu contraseña"
               autocomplete="current-password"
+              [maxLength]="72"
               [control]="form.controls.password"
-              validationMessage="La contraseña es obligatoria."
+              validationMessage="La contraseña es obligatoria y no puede superar 72 caracteres."
             />
 
             @if (errorMessage) {
@@ -62,10 +66,6 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
               {{ submitting ? 'Ingresando…' : 'Iniciar sesión' }}
             </pa-button>
           </form>
-
-          <p class="register-link">
-            ¿Aún no tienes cuenta? <a routerLink="/registro">Regístrate como paciente</a>
-          </p>
 
           <p class="privacy-note">
             <span aria-hidden="true">●</span>
@@ -79,14 +79,21 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
 })
 export class LoginPageComponent {
   protected readonly form = new FormGroup({
-    correo: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
-    password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    correo: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, nonBlank, Validators.email, Validators.maxLength(150)],
+    }),
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(72)],
+    }),
   });
   protected submitting = false;
   protected errorMessage = '';
 
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   submit(): void {
     if (this.form.invalid) {
@@ -96,12 +103,17 @@ export class LoginPageComponent {
 
     this.errorMessage = '';
     this.submitting = true;
-    this.auth.login(this.form.getRawValue())
-      .pipe(finalize(() => this.submitting = false))
+    const credentials = this.form.getRawValue();
+    this.auth.login({ ...credentials, correo: credentials.correo.trim().toLowerCase() })
+      .pipe(finalize(() => {
+        this.submitting = false;
+        this.changeDetector.markForCheck();
+      }))
       .subscribe({
         next: (response) => this.navigateAfterLogin(response),
         error: () => {
           this.errorMessage = 'No pudimos validar tus datos. Revisa el correo y la contraseña.';
+          this.changeDetector.markForCheck();
         },
       });
   }
@@ -109,7 +121,7 @@ export class LoginPageComponent {
   private navigateAfterLogin(response: AuthResponse): void {
     const destination = response.usuario.rol === 'ADMINISTRADOR'
       ? '/admin/pacientes'
-      : '/pacientes';
+      : '/paciente/citas';
     void this.router.navigateByUrl(destination);
   }
 }

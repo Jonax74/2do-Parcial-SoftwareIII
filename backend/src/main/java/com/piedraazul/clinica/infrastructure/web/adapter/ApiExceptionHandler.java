@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.piedraazul.clinica.domain.exception.CorreoYaRegistradoException;
 import com.piedraazul.clinica.domain.exception.CredencialesInvalidasException;
 import com.piedraazul.clinica.domain.exception.DocumentoYaRegistradoException;
+import com.piedraazul.clinica.domain.exception.RecursoNoEncontradoException;
 import com.piedraazul.clinica.infrastructure.web.dto.ApiErrorResponse;
 
 @RestControllerAdvice
@@ -20,6 +21,11 @@ public class ApiExceptionHandler {
 	@ExceptionHandler(CredencialesInvalidasException.class)
 	public ResponseEntity<ApiErrorResponse> invalidCredentials(CredencialesInvalidasException exception) {
 		return error(HttpStatus.UNAUTHORIZED, exception.getMessage());
+	}
+
+	@ExceptionHandler(RecursoNoEncontradoException.class)
+	public ResponseEntity<ApiErrorResponse> resourceNotFound(RecursoNoEncontradoException exception) {
+		return error(HttpStatus.NOT_FOUND, exception.getMessage());
 	}
 
 	@ExceptionHandler({ CorreoYaRegistradoException.class, DocumentoYaRegistradoException.class })

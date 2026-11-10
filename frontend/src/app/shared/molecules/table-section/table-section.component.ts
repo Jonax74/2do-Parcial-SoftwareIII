@@ -10,7 +10,7 @@ import { DataTableComponent } from '../../atoms/data-table/data-table.component'
     <section class="section-card">
       <div class="section-heading">
         <div>
-          <span class="eyebrow">Directorio de pacientes</span>
+          <span class="eyebrow">{{ eyebrow }}</span>
           <h2>{{ title }}</h2>
           <p>{{ description }}</p>
         </div>
@@ -23,6 +23,7 @@ import { DataTableComponent } from '../../atoms/data-table/data-table.component'
 })
 export class TableSectionComponent {
   @Input({ required: true }) title = '';
+  @Input() eyebrow = 'Directorio clínico';
   @Input() description = '';
   @Input() columns: TableColumn[] = [];
   @Input() rows: TableRow[] = [];

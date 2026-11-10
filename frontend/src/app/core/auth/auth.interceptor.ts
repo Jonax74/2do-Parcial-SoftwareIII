@@ -2,7 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { SessionStore } from './session-store.service';
 
-const PUBLIC_ENDPOINTS = ['/api/auth/login', '/api/auth/register', '/api/pacientes/publico'];
+const PUBLIC_ENDPOINTS = ['/api/auth/login', '/api/medicos/publico'];
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const path = new URL(request.url, 'http://localhost').pathname;

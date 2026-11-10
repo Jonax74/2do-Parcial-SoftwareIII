@@ -1,9 +1,9 @@
 .section-card {
   overflow: hidden;
   border: 1px solid var(--color-border);
-  border-radius: 1rem;
+  border-radius: 1.1rem;
   background: var(--color-surface);
-  box-shadow: 0 14px 35px rgb(20 61 67 / 6%);
+  box-shadow: var(--shadow-card);
 }
 
 .section-heading {
@@ -38,7 +38,7 @@ p {
   flex: none;
   padding: 0.45rem 0.7rem;
   border-radius: 2rem;
-  background: #e9f4f1;
+  background: #e5f4fb;
   color: var(--color-primary-dark);
   font-size: 0.8rem;
   font-weight: 700;

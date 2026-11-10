@@ -8,6 +8,8 @@ import com.piedraazul.clinica.domain.model.PacienteConUsuario;
 public interface PacienteRepositoryPort {
 	boolean existsByDocumento(String documento);
 
+	boolean existsById(Long pacienteId);
+
 	Paciente save(Paciente paciente);
 
 	List<PacienteConUsuario> findAllWithUsuario();

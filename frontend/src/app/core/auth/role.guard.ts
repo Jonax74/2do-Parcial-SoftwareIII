@@ -9,6 +9,6 @@ export const roleGuard: CanActivateFn = (route) => {
   const requiredRole = route.data['role'] as UserRole | undefined;
 
   return requiredRole && auth.role() !== requiredRole
-    ? router.createUrlTree(['/pacientes'])
+    ? router.createUrlTree(['/medicos'])
     : true;
 };

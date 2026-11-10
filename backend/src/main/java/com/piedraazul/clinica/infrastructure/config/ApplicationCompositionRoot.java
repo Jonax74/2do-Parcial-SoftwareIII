@@ -5,12 +5,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.piedraazul.clinica.application.port.in.CrearUsuarioUseCase;
+import com.piedraazul.clinica.application.port.in.GestionarMedicosUseCase;
+import com.piedraazul.clinica.application.port.in.GestionarCitasUseCase;
 import com.piedraazul.clinica.application.port.in.IniciarSesionUseCase;
 import com.piedraazul.clinica.application.port.in.ListarPacientesUseCase;
 import com.piedraazul.clinica.application.port.in.RegistrarPacienteUseCase;
 import com.piedraazul.clinica.application.service.AutenticacionApplicationService;
 import com.piedraazul.clinica.application.service.CrearUsuarioApplicationService;
+import com.piedraazul.clinica.application.service.GestionarMedicosApplicationService;
+import com.piedraazul.clinica.application.service.GestionarCitasApplicationService;
+import com.piedraazul.clinica.domain.port.out.CitaRepositoryPort;
 import com.piedraazul.clinica.application.service.ListarPacientesApplicationService;
+import com.piedraazul.clinica.domain.port.out.MedicoRepositoryPort;
 import com.piedraazul.clinica.domain.port.out.PacienteRepositoryPort;
 import com.piedraazul.clinica.domain.port.out.PasswordHasherPort;
 import com.piedraazul.clinica.domain.port.out.TokenIssuerPort;
@@ -56,5 +62,18 @@ public class ApplicationCompositionRoot {
 	@Bean
 	ListarPacientesUseCase listarPacientesUseCase(PacienteRepositoryPort pacienteRepository) {
 		return new ListarPacientesApplicationService(pacienteRepository);
+	}
+
+	@Bean
+	GestionarMedicosUseCase gestionarMedicosUseCase(MedicoRepositoryPort medicoRepository) {
+		return new GestionarMedicosApplicationService(medicoRepository);
+	}
+
+	@Bean
+	GestionarCitasUseCase gestionarCitasUseCase(
+			CitaRepositoryPort citaRepository,
+			PacienteRepositoryPort pacienteRepository,
+			MedicoRepositoryPort medicoRepository) {
+		return new GestionarCitasApplicationService(citaRepository, pacienteRepository, medicoRepository);
 	}
 }

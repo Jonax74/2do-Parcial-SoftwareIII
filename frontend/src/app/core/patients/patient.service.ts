@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AdminPatient, PublicPatient } from './patient.models';
+import { AdminPatient } from './patient.models';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -9,11 +9,13 @@ const API_URL = 'http://localhost:8080/api';
 export class PatientService {
   private readonly http = inject(HttpClient);
 
-  listPublic(): Observable<PublicPatient[]> {
-    return this.http.get<PublicPatient[]>(`${API_URL}/pacientes/publico`);
-  }
-
   listForAdministration() {
     return this.http.get<AdminPatient[]>(`${API_URL}/admin/pacientes`);
+  }
+
+  documentExists(document: string): Observable<boolean> {
+    return this.http.get<boolean>(`${API_URL}/admin/pacientes/existe`, {
+      params: { documento: document },
+    });
   }
 }

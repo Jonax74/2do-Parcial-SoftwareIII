@@ -9,6 +9,7 @@ input {
 }
 
 input:focus {
-  border-color: var(--color-primary);
-  outline: 3px solid rgb(13 107 103 / 12%);
+  border-color: var(--color-primary-mid);
+  box-shadow: 0 0 0 3px rgb(63 174 239 / 14%);
+  outline: 0;
 }

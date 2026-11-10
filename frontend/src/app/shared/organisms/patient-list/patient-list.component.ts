@@ -1,96 +1,85 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { PatientService } from '../../../core/patients/patient.service';
-import { AdminPatient, PublicPatient, TableColumn, TableRow } from '../../../core/patients/patient.models';
+import { AdminPatient, TableColumn, TableRow } from '../../../core/patients/patient.models';
+import { RouterLink } from '@angular/router';
+import { ButtonComponent } from '../../atoms/button/button.component';
 import { TableSectionComponent } from '../../molecules/table-section/table-section.component';
-
-type PatientListScope = 'public' | 'admin';
 
 @Component({
   selector: 'pa-patient-list',
   standalone: true,
-  imports: [TableSectionComponent],
+  imports: [ButtonComponent, RouterLink, TableSectionComponent],
   template: `
-    <div class="page-intro">
-      <span class="eyebrow">Clínica Piedra Azul</span>
-      <h1>{{ scope === 'admin' ? 'Gestión de pacientes' : 'Nuestros pacientes' }}</h1>
-      <p>
-        {{ scope === 'admin'
-          ? 'Consulta la información registrada para brindar una atención coordinada.'
-          : 'Directorio público de pacientes registrados en la clínica.' }}
-      </p>
-    </div>
+    <section class="page-intro">
+      <div>
+        <span class="eyebrow">Área administrativa</span>
+        <h1>Pacientes</h1>
+        <p>Consulta la información registrada para brindar una atención coordinada y segura.</p>
+      </div>
+      <a class="action-link" routerLink="/admin/pacientes/nuevo">Registrar paciente <span aria-hidden="true">＋</span></a>
+    </section>
 
     @if (loading) {
       <p class="status" role="status">Cargando pacientes…</p>
     } @else if (errorMessage) {
       <p class="status error" role="alert">{{ errorMessage }}</p>
+      <pa-button variant="secondary" (click)="loadPatients()">Intentar de nuevo</pa-button>
     } @else {
       <pa-table-section
-        [title]="scope === 'admin' ? 'Pacientes registrados' : 'Directorio'"
-        [description]="scope === 'admin'
-          ? 'Información disponible para el equipo administrativo.'
-          : 'El listado público contiene únicamente nombre y documento.'"
+        title="Pacientes registrados"
+        description="Información confidencial disponible únicamente para el equipo autorizado."
+        eyebrow="Directorio clínico"
         [columns]="columns"
         [rows]="rows"
+        emptyMessage="Aún no hay pacientes registrados."
       />
     }
   `,
   styleUrl: './patient-list.component.scss',
 })
 export class PatientListComponent implements OnInit {
-  @Input() scope: PatientListScope = 'public';
-
   protected loading = true;
   protected errorMessage = '';
   protected rows: TableRow[] = [];
-  protected columns: TableColumn[] = [];
+  protected readonly columns: TableColumn[] = [
+    { key: 'nombre', label: 'Nombre' },
+    { key: 'documento', label: 'Documento' },
+    { key: 'correo', label: 'Correo' },
+    { key: 'telefono', label: 'Teléfono' },
+    { key: 'fechaNacimiento', label: 'Nacimiento' },
+  ];
 
   private readonly patientService = inject(PatientService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    this.columns = this.scope === 'admin'
-      ? [
-          { key: 'nombre', label: 'Nombre' },
-          { key: 'documento', label: 'Documento' },
-          { key: 'correo', label: 'Correo' },
-          { key: 'telefono', label: 'Teléfono' },
-          { key: 'fechaNacimiento', label: 'Fecha de nacimiento' },
-        ]
-      : [
-          { key: 'nombre', label: 'Nombre' },
-          { key: 'documento', label: 'Documento' },
-        ];
+    this.loadPatients();
+  }
 
-    const patients$ = this.scope === 'admin'
-      ? this.patientService.listForAdministration()
-      : this.patientService.listPublic();
-
-    patients$.subscribe({
+  protected loadPatients(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.patientService.listForAdministration().subscribe({
       next: (patients) => {
         this.rows = patients.map((patient) => this.toRow(patient));
         this.loading = false;
+        this.changeDetector.markForCheck();
       },
       error: () => {
-        this.errorMessage = 'No fue posible cargar el listado. Intenta de nuevo más tarde.';
+        this.errorMessage = 'No fue posible cargar el directorio. Verifica tu conexión e inténtalo de nuevo.';
         this.loading = false;
+        this.changeDetector.markForCheck();
       },
     });
   }
 
-  private toRow(patient: PublicPatient | AdminPatient): TableRow {
-    if ('id' in patient) {
-      return {
-        nombre: patient.nombre,
-        documento: patient.documento,
-        correo: patient.correo,
-        telefono: patient.telefono ?? '',
-        fechaNacimiento: patient.fechaNacimiento ?? '',
-      };
-    }
-
+  private toRow(patient: AdminPatient): TableRow {
     return {
       nombre: patient.nombre,
       documento: patient.documento,
+      correo: patient.correo,
+      telefono: patient.telefono ?? '',
+      fechaNacimiento: patient.fechaNacimiento ?? '',
     };
   }
 }

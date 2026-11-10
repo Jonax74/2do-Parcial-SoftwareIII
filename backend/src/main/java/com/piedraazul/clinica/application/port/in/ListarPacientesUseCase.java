@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ListarPacientesUseCase {
-	List<PacienteListado> listarPublicos();
-
 	List<PacienteListado> listarAdministrativos();
+
+	boolean existeDocumento(String documento);
 
 	record PacienteListado(
 			Long id,

@@ -1,10 +1,18 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, Input, inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import {
+  AsyncValidatorFn,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
+import { catchError, finalize, map, of, tap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { PatientRegistration, UserRegistration, UserRole } from '../../../core/auth/auth.models';
+import { nonBlank, pastDate } from '../../../core/forms/form-validators';
+import { PatientService } from '../../../core/patients/patient.service';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { FormFieldComponent } from '../../molecules/form-field/form-field.component';
 
@@ -21,26 +29,25 @@ type RegistrationFormValue = {
 @Component({
   selector: 'pa-user-registration-form',
   standalone: true,
-  imports: [ButtonComponent, FormFieldComponent, ReactiveFormsModule, RouterLink],
+  imports: [ButtonComponent, FormFieldComponent, ReactiveFormsModule],
   template: `
     <section class="registration-card">
       <span class="eyebrow">{{ adminMode ? 'Gestión de cuentas' : 'Registro de paciente' }}</span>
-      <h1>{{ adminMode ? 'Registrar usuario' : 'Crear cuenta de paciente' }}</h1>
+      <h1>{{ patientOnly ? 'Registrar paciente' : (adminMode ? 'Registrar usuario' : 'Crear cuenta de paciente') }}</h1>
       <p class="intro">
-        {{ adminMode
+        {{ patientOnly
+          ? 'Registra los datos del paciente. La cédula se verifica con el directorio antes de guardar.'
+          : (adminMode
           ? 'Crea una cuenta administrativa o registra un paciente desde la clínica.'
-          : 'Completa tus datos para crear tu cuenta y tu perfil de paciente.' }}
+          : 'Completa tus datos para crear tu cuenta y tu perfil de paciente.') }}
       </p>
 
       @if (successMessage) {
         <p class="success-message" role="status">{{ successMessage }}</p>
-        @if (!adminMode) {
-          <a class="sign-in-link" routerLink="/login">Ir a iniciar sesión</a>
-        }
       } @else {
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <div class="form-grid">
-            @if (adminMode) {
+            @if (adminMode && !patientOnly) {
               <div class="field">
                 <label for="rol">Tipo de usuario</label>
                 <select id="rol" formControlName="rol" (change)="updateDocumentValidation()">
@@ -55,8 +62,9 @@ type RegistrationFormValue = {
               label="Nombre completo"
               placeholder="Nombre y apellidos"
               autocomplete="name"
+              [maxLength]="120"
               [control]="form.controls.nombre"
-              validationMessage="El nombre es obligatorio."
+              validationMessage="El nombre es obligatorio y debe tener entre 2 y 120 caracteres."
             />
             <pa-form-field
               inputId="registro-correo"
@@ -64,8 +72,9 @@ type RegistrationFormValue = {
               type="email"
               placeholder="nombre@correo.com"
               autocomplete="email"
+              [maxLength]="150"
               [control]="form.controls.correo"
-              validationMessage="Ingresa un correo electrónico válido."
+              validationMessage="Ingresa un correo válido de máximo 150 caracteres."
             />
             <pa-form-field
               inputId="registro-password"
@@ -73,6 +82,7 @@ type RegistrationFormValue = {
               type="password"
               placeholder="Mínimo 8 caracteres"
               autocomplete="new-password"
+              [maxLength]="72"
               [control]="form.controls.password"
               validationMessage="La contraseña debe tener entre 8 y 72 caracteres."
             />
@@ -83,19 +93,36 @@ type RegistrationFormValue = {
                 label="Documento"
                 placeholder="Número de documento"
                 autocomplete="off"
+                [maxLength]="15"
+                inputMode="numeric"
+                [digitsOnly]="true"
                 [control]="form.controls.documento"
-                validationMessage="El documento es obligatorio."
+                [validationMessage]="documentValidationMessage"
               />
+              @if (form.controls.documento.hasError('documentExists')) {
+                <p class="error-message" role="alert">Ya existe un paciente registrado con esta cédula.</p>
+              } @else if (form.controls.documento.hasError('documentLookupUnavailable')) {
+                <p class="error-message" role="alert">No fue posible verificar la cédula. Intenta de nuevo.</p>
+              } @else if (form.controls.documento.pending) {
+                <p class="checking-message" role="status">Verificando cédula…</p>
+              }
               <pa-form-field
                 inputId="telefono"
                 label="Teléfono (opcional)"
                 placeholder="Número de contacto"
                 autocomplete="tel"
+                [maxLength]="15"
+                inputMode="numeric"
+                [digitsOnly]="true"
                 [control]="form.controls.telefono"
+                validationMessage="El teléfono debe contener entre 7 y 15 dígitos."
               />
               <div class="field">
                 <label for="fechaNacimiento">Fecha de nacimiento (opcional)</label>
-                <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento" />
+                <input id="fechaNacimiento" type="date" [max]="today" formControlName="fechaNacimiento" />
+                @if (form.controls.fechaNacimiento.touched && form.controls.fechaNacimiento.invalid) {
+                  <small class="field-error">La fecha de nacimiento debe ser anterior a hoy.</small>
+                }
               </div>
             }
           </div>
@@ -105,29 +132,37 @@ type RegistrationFormValue = {
           }
 
           <pa-button type="submit" [disabled]="submitting">
-            {{ submitting ? 'Guardando…' : (adminMode ? 'Registrar usuario' : 'Crear cuenta') }}
+            {{ submitting ? 'Guardando…' : (patientOnly ? 'Registrar paciente' : (adminMode ? 'Registrar usuario' : 'Crear cuenta')) }}
           </pa-button>
         </form>
 
-        @if (!adminMode) {
-          <p class="existing-account">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
-        }
       }
     </section>
   `,
   styleUrl: './user-registration-form.component.scss',
 })
-export class UserRegistrationFormComponent {
-  @Input() adminMode = false;
+export class UserRegistrationFormComponent implements OnInit {
+  @Input() adminMode = true;
+  @Input() patientOnly = false;
+
+  private readonly auth = inject(AuthService);
+  private readonly patientService = inject(PatientService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly documentValidator: AsyncValidatorFn = (control) =>
+    this.patientService.documentExists(String(control.value).trim()).pipe(
+    map((exists): ValidationErrors | null => exists ? { documentExists: true } : null),
+    catchError(() => of({ documentLookupUnavailable: true })),
+    tap(() => this.changeDetector.markForCheck()),
+  );
 
   protected readonly form = new FormGroup({
     nombre: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(120)],
+      validators: [Validators.required, nonBlank, Validators.minLength(2), Validators.maxLength(120)],
     }),
     correo: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.email, Validators.maxLength(150)],
+      validators: [Validators.required, nonBlank, Validators.email, Validators.maxLength(150)],
     }),
     password: new FormControl('', {
       nonNullable: true,
@@ -136,34 +171,50 @@ export class UserRegistrationFormComponent {
     rol: new FormControl<UserRole>('PACIENTE', { nonNullable: true }),
     documento: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(30)],
+      validators: [Validators.required, Validators.minLength(6), Validators.maxLength(15), Validators.pattern(/^\d+$/)],
+      updateOn: 'blur',
     }),
-    telefono: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(30)] }),
-    fechaNacimiento: new FormControl('', { nonNullable: true }),
+    telefono: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d{7,15}$/)] }),
+    fechaNacimiento: new FormControl('', { nonNullable: true, validators: [pastDate] }),
   });
 
   protected submitting = false;
   protected errorMessage = '';
   protected successMessage = '';
-  private readonly auth = inject(AuthService);
+  protected readonly today = this.getLocalDate();
+
+  ngOnInit(): void {
+    this.updateDocumentValidation();
+  }
 
   protected get isPatient(): boolean {
-    return !this.adminMode || this.form.controls.rol.value === 'PACIENTE';
+    return this.patientOnly || !this.adminMode || this.form.controls.rol.value === 'PACIENTE';
+  }
+
+  protected get documentValidationMessage(): string {
+    const document = this.form.controls.documento;
+    if (document.hasError('required')) {
+      return 'La cédula es obligatoria.';
+    }
+    if (document.hasError('minlength') || document.hasError('maxlength')) {
+      return 'La cédula debe tener entre 6 y 15 dígitos.';
+    }
+    return 'La cédula solo puede contener dígitos.';
   }
 
   protected updateDocumentValidation(): void {
     const documentControl = this.form.controls.documento;
     documentControl.setValidators(
       this.isPatient
-        ? [Validators.required, Validators.maxLength(30)]
-        : [Validators.maxLength(30)],
+        ? [Validators.required, Validators.minLength(6), Validators.maxLength(15), Validators.pattern(/^\d+$/)]
+        : [],
     );
+    documentControl.setAsyncValidators(this.isPatient ? [this.documentValidator] : []);
     documentControl.updateValueAndValidity();
   }
 
   protected submit(): void {
-    this.updateDocumentValidation();
-    if (this.form.invalid) {
+    if (this.form.invalid || this.form.pending) {
       this.form.markAllAsTouched();
       return;
     }
@@ -171,18 +222,23 @@ export class UserRegistrationFormComponent {
     this.errorMessage = '';
     this.submitting = true;
     const value = this.form.getRawValue();
-    const request = this.adminMode
-      ? this.auth.registerUser(this.toAdminRegistration(value))
-      : this.auth.registerPatient(this.toPatientRegistration(value));
+    const request = this.patientOnly || value.rol === 'PACIENTE'
+      ? this.auth.registerPatient(this.toPatientRegistration(value))
+      : this.auth.registerUser(this.toAdminRegistration(value));
 
-    request.pipe(finalize(() => this.submitting = false)).subscribe({
+    request.pipe(finalize(() => {
+      this.submitting = false;
+      this.changeDetector.markForCheck();
+    })).subscribe({
       next: (user) => {
-        this.successMessage = this.adminMode
+        this.successMessage = !this.patientOnly && user.rol === 'ADMINISTRADOR'
           ? `La cuenta de ${user.nombre} se registró correctamente.`
-          : 'Tu cuenta y perfil de paciente se crearon correctamente.';
+          : `${user.nombre} se registró correctamente como paciente.`;
+        this.changeDetector.markForCheck();
       },
       error: (error: unknown) => {
         this.errorMessage = this.readErrorMessage(error);
+        this.changeDetector.markForCheck();
       },
     });
   }
@@ -190,7 +246,7 @@ export class UserRegistrationFormComponent {
   private toPatientRegistration(value: RegistrationFormValue): PatientRegistration {
     return {
       nombre: value.nombre,
-      correo: value.correo,
+      correo: value.correo.trim().toLowerCase(),
       password: value.password,
       documento: value.documento,
       telefono: value.telefono || undefined,
@@ -198,10 +254,17 @@ export class UserRegistrationFormComponent {
     };
   }
 
+  private getLocalDate(): string {
+    const date = new Date();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
+  }
+
   private toAdminRegistration(value: RegistrationFormValue): UserRegistration {
     const registration: UserRegistration = {
       nombre: value.nombre,
-      correo: value.correo,
+      correo: value.correo.trim().toLowerCase(),
       password: value.password,
       rol: value.rol,
     };

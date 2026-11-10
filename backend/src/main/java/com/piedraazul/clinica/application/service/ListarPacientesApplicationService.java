@@ -14,19 +14,6 @@ public class ListarPacientesApplicationService implements ListarPacientesUseCase
 	}
 
 	@Override
-	public List<PacienteListado> listarPublicos() {
-		return pacienteRepository.findAllWithUsuario().stream()
-				.map(paciente -> new PacienteListado(
-						null,
-						paciente.nombre(),
-						paciente.documento(),
-						null,
-						null,
-						null))
-				.toList();
-	}
-
-	@Override
 	public List<PacienteListado> listarAdministrativos() {
 		return pacienteRepository.findAllWithUsuario().stream()
 				.map(paciente -> {
@@ -39,5 +26,10 @@ public class ListarPacientesApplicationService implements ListarPacientesUseCase
 							paciente.fechaNacimiento());
 				})
 				.toList();
+	}
+
+	@Override
+	public boolean existeDocumento(String documento) {
+		return pacienteRepository.existsByDocumento(documento.trim());
 	}
 }

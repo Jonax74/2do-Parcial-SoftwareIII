@@ -1,0 +1,248 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
+import { Doctor } from '../../../core/doctors/doctor.models';
+import { DoctorService } from '../../../core/doctors/doctor.service';
+import { nonBlank } from '../../../core/forms/form-validators';
+import { TableColumn, TableRow } from '../../../core/patients/patient.models';
+import { ButtonComponent } from '../../atoms/button/button.component';
+import { DigitsOnlyDirective } from '../../directives/digits-only.directive';
+import { TableSectionComponent } from '../../molecules/table-section/table-section.component';
+
+@Component({
+  selector: 'pa-doctor-directory',
+  standalone: true,
+  imports: [ButtonComponent, DigitsOnlyDirective, ReactiveFormsModule, TableSectionComponent],
+  template: `
+    @if (!adminMode) {
+      <section class="welcome-banner">
+        <div class="welcome-copy">
+          <span class="eyebrow">Clínica Piedra Azul · Atención integral</span>
+          <h1>Un equipo que cuida de ti.</h1>
+          <p>Conoce a nuestros profesionales y encuentra el acompañamiento experto que necesitas.</p>
+        </div>
+        <div class="medical-seal" aria-hidden="true">
+          <img src="/images/clinica-symbol.png" alt="" />
+        </div>
+        <div class="banner-wave" aria-hidden="true"></div>
+      </section>
+      <section class="benefits" aria-label="Compromisos de la clínica">
+        <article><span aria-hidden="true">✦</span><strong>Atención cercana</strong><small>Personas primero, siempre.</small></article>
+        <article><span aria-hidden="true">✚</span><strong>Equipo profesional</strong><small>Experiencia en cada especialidad.</small></article>
+        <article><span aria-hidden="true">♡</span><strong>Confianza y cuidado</strong><small>Tu bienestar nos inspira.</small></article>
+      </section>
+    } @else {
+      <section class="page-intro">
+        <div>
+          <span class="eyebrow">Área administrativa</span>
+          <h1>Equipo médico</h1>
+          <p>Gestiona el directorio de profesionales de la Clínica Piedra Azul.</p>
+        </div>
+        <pa-button (click)="showForm = !showForm">
+          {{ showForm ? 'Cerrar formulario' : 'Registrar médico' }}
+        </pa-button>
+      </section>
+      @if (showForm) {
+        <section class="form-card">
+          <span class="eyebrow">Nuevo profesional</span>
+          <h2>Registrar médico</h2>
+          <form [formGroup]="form" (ngSubmit)="register()" novalidate>
+            <label>
+              Nombre completo
+              <input formControlName="nombre" autocomplete="name" maxlength="120" placeholder="Dra. Nombre Apellido" />
+              @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+                <small class="field-error">
+                  @if (form.controls.nombre.hasError('blank') || form.controls.nombre.hasError('required')) {
+                    El nombre es obligatorio.
+                  } @else if (form.controls.nombre.hasError('minlength')) {
+                    El nombre debe tener al menos 2 caracteres.
+                  } @else {
+                    El nombre no puede superar 120 caracteres.
+                  }
+                </small>
+              }
+            </label>
+            <label>
+              Especialidad
+              <input formControlName="especialidad" maxlength="100" placeholder="Medicina general" />
+              @if (form.controls.especialidad.touched && form.controls.especialidad.invalid) {
+                <small class="field-error">
+                  @if (form.controls.especialidad.hasError('blank') || form.controls.especialidad.hasError('required')) {
+                    La especialidad es obligatoria.
+                  } @else if (form.controls.especialidad.hasError('minlength')) {
+                    La especialidad debe tener al menos 2 caracteres.
+                  } @else {
+                    La especialidad no puede superar 100 caracteres.
+                  }
+                </small>
+              }
+            </label>
+            <label>
+              Correo electrónico
+              <input formControlName="correo" type="email" autocomplete="email" maxlength="150" placeholder="medico@clinica.com" />
+              @if (form.controls.correo.touched && form.controls.correo.invalid) {
+                <small class="field-error">
+                  @if (form.controls.correo.hasError('required') || form.controls.correo.hasError('blank')) {
+                    El correo es obligatorio.
+                  } @else if (form.controls.correo.hasError('maxlength')) {
+                    El correo no puede superar 150 caracteres.
+                  } @else {
+                    Ingresa un correo electrónico válido.
+                  }
+                </small>
+              }
+            </label>
+            <label>
+              Teléfono <span class="optional">(opcional)</span>
+              <input
+                formControlName="telefono"
+                type="text"
+                inputmode="numeric"
+                maxlength="15"
+                paDigitsOnly
+                autocomplete="tel"
+                placeholder="3000000000"
+              />
+              @if (form.controls.telefono.touched && form.controls.telefono.invalid) {
+                <small class="field-error">El teléfono debe contener entre 7 y 15 dígitos.</small>
+              }
+            </label>
+            @if (formError) {
+              <p class="form-error" role="alert">{{ formError }}</p>
+            }
+            @if (formSuccess) {
+              <p class="form-success" role="status">{{ formSuccess }}</p>
+            }
+            <pa-button type="submit" [disabled]="saving">
+              {{ saving ? 'Guardando…' : 'Guardar médico' }}
+            </pa-button>
+          </form>
+        </section>
+      }
+    }
+
+    @if (loading) {
+      <p class="status" role="status">Cargando profesionales…</p>
+    } @else if (errorMessage) {
+      <p class="status error" role="alert">{{ errorMessage }}</p>
+      <pa-button variant="secondary" (click)="loadDoctors()">Intentar de nuevo</pa-button>
+    } @else {
+      <pa-table-section
+        [eyebrow]="adminMode ? 'Directorio interno' : 'Nuestros profesionales'"
+        [title]="adminMode ? 'Directorio médico' : 'Especialistas a tu servicio'"
+        [description]="adminMode
+          ? 'Información de contacto y especialidad de los médicos registrados.'
+          : 'Consulta las especialidades disponibles y elige con confianza.'"
+        [columns]="columns"
+        [rows]="rows"
+        emptyMessage="Aún no hay médicos registrados."
+      />
+    }
+  `,
+  styleUrl: './doctor-directory.component.scss',
+})
+export class DoctorDirectoryComponent implements OnInit {
+  @Input() adminMode = false;
+
+  protected loading = true;
+  protected saving = false;
+  protected showForm = false;
+  protected errorMessage = '';
+  protected formError = '';
+  protected formSuccess = '';
+  protected rows: TableRow[] = [];
+  protected readonly columns: TableColumn[] = [
+    { key: 'nombre', label: 'Profesional' },
+    { key: 'especialidad', label: 'Especialidad' },
+    { key: 'correo', label: 'Correo' },
+    { key: 'telefono', label: 'Teléfono' },
+  ];
+  protected readonly form = new FormGroup({
+    nombre: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, nonBlank, Validators.minLength(2), Validators.maxLength(120)],
+    }),
+    especialidad: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, nonBlank, Validators.minLength(2), Validators.maxLength(100)],
+    }),
+    correo: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, nonBlank, Validators.email, Validators.maxLength(150)],
+    }),
+    telefono: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^\d{7,15}$/)],
+    }),
+  });
+
+  private readonly doctorService = inject(DoctorService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+
+  ngOnInit(): void {
+    this.loadDoctors();
+  }
+
+  protected loadDoctors(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    const request = this.adminMode
+      ? this.doctorService.listForAdministration()
+      : this.doctorService.listPublic();
+    request.subscribe({
+      next: (doctors) => {
+        this.rows = doctors.map((doctor) => this.toRow(doctor));
+        this.loading = false;
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'No fue posible cargar el directorio médico. Intenta de nuevo.';
+        this.loading = false;
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  protected register(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.saving = true;
+    this.formError = '';
+    this.formSuccess = '';
+    const value = this.form.getRawValue();
+    this.doctorService.register({
+      nombre: value.nombre.trim(),
+      especialidad: value.especialidad.trim(),
+      correo: value.correo.trim().toLowerCase(),
+      telefono: value.telefono.trim() || undefined,
+    }).pipe(finalize(() => {
+      this.saving = false;
+      this.changeDetector.markForCheck();
+    })).subscribe({
+      next: (doctor) => {
+        this.formSuccess = `${doctor.nombre} se agregó al directorio médico.`;
+        this.form.reset();
+        this.changeDetector.markForCheck();
+        this.loadDoctors();
+      },
+      error: (error: unknown) => {
+        this.formError = error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
+          ? error.error.message
+          : 'No se pudo registrar el médico. Revisa los datos e inténtalo de nuevo.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  private toRow(doctor: Doctor): TableRow {
+    return {
+      nombre: doctor.nombre,
+      especialidad: doctor.especialidad,
+      correo: doctor.correo,
+      telefono: doctor.telefono ?? '',
+    };
+  }
+}

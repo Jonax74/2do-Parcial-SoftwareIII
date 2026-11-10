@@ -5,7 +5,7 @@
   border: 1px solid var(--color-border);
   border-radius: 1rem;
   background: white;
-  box-shadow: 0 18px 48px rgb(20 61 67 / 8%);
+  box-shadow: var(--shadow-card);
 }
 
 .eyebrow {
@@ -57,6 +57,13 @@ input[type="date"] {
   font: inherit;
 }
 
+select:focus,
+input[type="date"]:focus {
+  border-color: var(--color-primary-mid);
+  box-shadow: 0 0 0 3px rgb(63 174 239 / 14%);
+  outline: 0;
+}
+
 form > pa-button {
   display: inline-block;
   margin-top: 1.3rem;
@@ -67,10 +74,16 @@ form > pa-button {
   color: var(--color-danger);
 }
 
+.checking-message {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+}
+
 .success-message {
   padding: 1rem;
   border-radius: 0.7rem;
-  background: #e9f4f1;
+  background: #e8f5fb;
   color: var(--color-primary-dark);
   line-height: 1.55;
 }

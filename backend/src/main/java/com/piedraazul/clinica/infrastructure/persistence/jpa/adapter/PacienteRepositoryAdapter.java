@@ -30,6 +30,11 @@ public class PacienteRepositoryAdapter implements PacienteRepositoryPort {
 	}
 
 	@Override
+	public boolean existsById(Long pacienteId) {
+		return pacienteRepository.existsById(pacienteId);
+	}
+
+	@Override
 	public Paciente save(Paciente paciente) {
 		var usuario = usuarioRepository.getReferenceById(paciente.usuarioId());
 		var entity = new PacienteJpaEntity(

@@ -8,7 +8,7 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
   imports: [AppShellComponent, PatientListComponent],
   template: `
     <pa-app-shell>
-      <pa-patient-list scope="admin" />
+      <pa-patient-list />
     </pa-app-shell>
   `,
 })

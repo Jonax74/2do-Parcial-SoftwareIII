@@ -25,7 +25,7 @@ export class AuthService {
   }
 
   registerPatient(registration: PatientRegistration): Observable<RegisteredUser> {
-    return this.http.post<RegisteredUser>(`${API_URL}/auth/register`, registration);
+    return this.http.post<RegisteredUser>(`${API_URL}/admin/pacientes`, registration);
   }
 
   registerUser(registration: UserRegistration): Observable<RegisteredUser> {

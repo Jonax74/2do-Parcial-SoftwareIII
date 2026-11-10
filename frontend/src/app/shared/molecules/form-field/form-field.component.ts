@@ -14,6 +14,9 @@ import { InputTextComponent } from '../../atoms/input-text/input-text.component'
         [type]="type"
         [placeholder]="placeholder"
         [autocomplete]="autocomplete"
+        [maxLength]="maxLength"
+        [inputMode]="inputMode"
+        [digitsOnly]="digitsOnly"
         [control]="control"
       />
       @if (control.touched && control.invalid) {
@@ -30,5 +33,8 @@ export class FormFieldComponent {
   @Input() type: 'text' | 'email' | 'password' = 'text';
   @Input() placeholder = '';
   @Input() autocomplete = 'off';
+  @Input() maxLength?: number;
+  @Input() inputMode?: 'numeric' | 'text';
+  @Input() digitsOnly = false;
   @Input() validationMessage = 'Revisa este campo.';
 }

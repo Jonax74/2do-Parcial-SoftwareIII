@@ -1,10 +1,7 @@
-export interface PublicPatient {
+export interface AdminPatient {
+  id: number;
   nombre: string;
   documento: string;
-}
-
-export interface AdminPatient extends PublicPatient {
-  id: number;
   correo: string;
   telefono: string | null;
   fechaNacimiento: string | null;
