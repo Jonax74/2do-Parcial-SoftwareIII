@@ -26,7 +26,11 @@ docker compose up -d db
 Desde `backend`, genera una clave de desarrollo temporal y configura un administrador inicial:
 
 ```powershell
-$env:JWT_SECRET = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+$jwtBytes = New-Object byte[] 32
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+$rng.GetBytes($jwtBytes)
+$env:JWT_SECRET = [Convert]::ToBase64String($jwtBytes)
+$rng.Dispose()
 $env:BOOTSTRAP_ADMIN_NAME = "Administración Clínica"
 $env:BOOTSTRAP_ADMIN_EMAIL = "admin@piedraazul.test"
 $env:BOOTSTRAP_ADMIN_PASSWORD = Read-Host "Contraseña temporal del administrador"

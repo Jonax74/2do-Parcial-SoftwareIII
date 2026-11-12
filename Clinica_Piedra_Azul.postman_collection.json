@@ -1,0 +1,1395 @@
+{
+  "info": {
+    "name": "Clínica Piedra Azul - Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenPaciente",
+      "value": ""
+    },
+    {
+      "key": "tokenMedico",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Rutas públicas",
+      "item": [
+        {
+          "name": "Login administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"tokenAdmin\", pm.response.json().accessToken);",
+                  "pm.test(\"Trae rol ADMIN\", function () { pm.expect(pm.response.json().roles).to.include(\"ROLE_ADMIN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login paciente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"tokenPaciente\", pm.response.json().accessToken);",
+                  "pm.test(\"Trae rol PACIENTE\", function () { pm.expect(pm.response.json().roles).to.include(\"ROLE_PACIENTE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"1002003001\",\n  \"password\": \"paciente123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login con clave incorrecta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"mala\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Listar médicos (público)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Es una lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/public/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "medicos"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Rutas privadas sin token (401)",
+      "item": [
+        {
+          "name": "Listar médicos sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar pacientes sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar todas las citas sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mis citas sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas/mis-citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas",
+                "mis-citas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar médico sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Rol no autorizado (403)",
+      "item": [
+        {
+          "name": "Paciente intenta listar médicos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenPaciente}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Paciente intenta listar pacientes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenPaciente}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Paciente intenta listar todas las citas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenPaciente}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Paciente intenta crear cita",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenPaciente}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Administrador intenta ver mis-citas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas/mis-citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas",
+                "mis-citas"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Administrador (token válido)",
+      "item": [
+        {
+          "name": "Login administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"tokenAdmin\", pm.response.json().accessToken);",
+                  "pm.test(\"Trae rol ADMIN\", function () { pm.expect(pm.response.json().roles).to.include(\"ROLE_ADMIN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Listar médicos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Existe médico (cédula libre)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"existe es booleano\", function () { pm.expect(pm.response.json().existe).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos/existe/11223344",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos",
+                "existe",
+                "11223344"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar médico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"11223344\",\n  \"nombres\": \"Sofía\",\n  \"apellidos\": \"Paz\",\n  \"especialidad\": \"Neurología\",\n  \"aniosTrabajando\": 4,\n  \"genero\": \"Femenino\",\n  \"fechaNacimiento\": \"1991-02-10\",\n  \"email\": \"sofia.paz@piedraazul.com\",\n  \"password\": \"medico123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Registrar médico repetido (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"11223344\",\n  \"nombres\": \"Sofía\",\n  \"apellidos\": \"Paz\",\n  \"especialidad\": \"Neurología\",\n  \"aniosTrabajando\": 4,\n  \"genero\": \"Femenino\",\n  \"fechaNacimiento\": \"1991-02-10\",\n  \"email\": \"sofia.paz@piedraazul.com\",\n  \"password\": \"medico123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Registrar médico inválido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"abc\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Listar pacientes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Existe paciente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"ya está registrado\", function () { pm.expect(pm.response.json().existe).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pacientes/existe/1002003001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pacientes",
+                "existe",
+                "1002003001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar paciente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"1004005006\",\n  \"nombres\": \"Camila\",\n  \"apellidos\": \"Torres\",\n  \"email\": \"camila.torres@correo.com\",\n  \"telefono\": \"3001234567\",\n  \"fechaNacimiento\": \"2000-08-21\",\n  \"password\": \"paciente123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Crear cita",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": 1,\n  \"medicoId\": 1,\n  \"fechaHora\": \"2030-01-15T10:30\",\n  \"motivo\": \"Control general\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Listar todas las citas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Paciente (token válido)",
+      "item": [
+        {
+          "name": "Login paciente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"tokenPaciente\", pm.response.json().accessToken);",
+                  "pm.test(\"Trae rol PACIENTE\", function () { pm.expect(pm.response.json().roles).to.include(\"ROLE_PACIENTE\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"1002003001\",\n  \"password\": \"paciente123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Mis citas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Solo citas propias\", function () { pm.response.json().forEach(function (c) { pm.expect(c.pacienteCedula).to.eql(\"1002003001\"); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenPaciente}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas/mis-citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas",
+                "mis-citas"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Médico (token válido y límites)",
+      "item": [
+        {
+          "name": "Login médico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"tokenMedico\", pm.response.json().accessToken);",
+                  "pm.test(\"Trae rol MEDICO\", function () { pm.expect(pm.response.json().roles).to.include(\"ROLE_MEDICO\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"79123456\",\n  \"password\": \"medico123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Médico lista pacientes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMedico}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Médico agenda una cita",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMedico}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas/agendar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas",
+                "agendar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": 2,\n  \"fechaHora\": \"2030-03-10T08:30\",\n  \"motivo\": \"Control agendado por el médico\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Médico intenta registrar paciente (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMedico}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pacientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Médico intenta listar médicos (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMedico}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Médico intenta ver todas las citas (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMedico}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Médico intenta ver mis-citas (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMedico}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas/mis-citas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas",
+                "mis-citas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Paciente intenta agendar (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenPaciente}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas/agendar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas",
+                "agendar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": 2,\n  \"fechaHora\": \"2030-03-10T08:30\",\n  \"motivo\": \"Control agendado por el médico\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Agendar sin token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/citas/agendar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "citas",
+                "agendar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": 2,\n  \"fechaHora\": \"2030-03-10T08:30\",\n  \"motivo\": \"Control agendado por el médico\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

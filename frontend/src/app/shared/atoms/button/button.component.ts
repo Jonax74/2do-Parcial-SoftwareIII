@@ -3,12 +3,8 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'pa-button',
   standalone: true,
-  template: `
-    <button [type]="type" [disabled]="disabled" [class.secondary]="variant === 'secondary'">
-      <ng-content />
-    </button>
-  `,
-  styleUrl: './button.component.scss',
+  templateUrl: './button.component.html',
+  styleUrl: './button.component.css',
 })
 export class ButtonComponent {
   @Input() type: 'button' | 'submit' = 'button';

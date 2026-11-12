@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/medicos/existe/11223344"
+method: GET
+headers:
+  Authorization: Bearer {{tokenAdmin}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Responde 200", function () { pm.response.to.have.status(200); });
+      pm.test("existe es booleano", function () { pm.expect(pm.response.json().existe).to.be.a("boolean"); });
+    language: text/javascript
+order: 3000

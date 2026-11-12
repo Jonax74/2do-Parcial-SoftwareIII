@@ -6,25 +6,8 @@ import { InputTextComponent } from '../../atoms/input-text/input-text.component'
   selector: 'pa-form-field',
   standalone: true,
   imports: [InputTextComponent],
-  template: `
-    <div class="field">
-      <label [for]="inputId">{{ label }}</label>
-      <pa-input-text
-        [inputId]="inputId"
-        [type]="type"
-        [placeholder]="placeholder"
-        [autocomplete]="autocomplete"
-        [maxLength]="maxLength"
-        [inputMode]="inputMode"
-        [digitsOnly]="digitsOnly"
-        [control]="control"
-      />
-      @if (control.touched && control.invalid) {
-        <small class="error">{{ validationMessage }}</small>
-      }
-    </div>
-  `,
-  styleUrl: './form-field.component.scss',
+  templateUrl: './form-field.component.html',
+  styleUrl: './form-field.component.css',
 })
 export class FormFieldComponent {
   @Input({ required: true }) inputId = '';

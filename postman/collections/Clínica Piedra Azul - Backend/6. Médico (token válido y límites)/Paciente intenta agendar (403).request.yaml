@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/citas/agendar"
+method: POST
+headers:
+  Authorization: Bearer {{tokenPaciente}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "pacienteId": 2,
+      "fechaHora": "2030-03-10T08:30",
+      "motivo": "Control agendado por el médico"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Responde 403", function () { pm.response.to.have.status(403); });
+    language: text/javascript
+order: 8000

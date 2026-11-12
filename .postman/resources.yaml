@@ -1,0 +1,11 @@
+# Use this workspace to collaborate
+workspace:
+  id: fff4426c-2950-418b-b419-574910df0b04
+
+localResources:
+  collections:
+    - ../Clinica_Piedra_Azul.postman_collection.json
+
+cloudResources:
+  collections:
+    ../postman/collections/Clínica Piedra Azul - Backend: dbce75f0-a3e4-41e1-bba2-e267f138c247

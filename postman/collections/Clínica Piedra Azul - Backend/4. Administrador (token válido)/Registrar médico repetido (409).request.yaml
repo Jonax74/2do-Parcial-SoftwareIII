@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/medicos"
+method: POST
+headers:
+  Authorization: Bearer {{tokenAdmin}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "cedula": "11223344",
+      "nombres": "Sofía",
+      "apellidos": "Paz",
+      "especialidad": "Neurología",
+      "aniosTrabajando": 4,
+      "genero": "Femenino",
+      "fechaNacimiento": "1991-02-10",
+      "email": "sofia.paz@piedraazul.com",
+      "password": "medico123"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Responde 409", function () { pm.response.to.have.status(409); });
+    language: text/javascript
+order: 5000

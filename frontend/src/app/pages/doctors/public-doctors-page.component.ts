@@ -6,10 +6,6 @@ import { DoctorDirectoryComponent } from '../../shared/organisms/doctor-director
   selector: 'pa-public-doctors-page',
   standalone: true,
   imports: [AppShellComponent, DoctorDirectoryComponent],
-  template: `
-    <pa-app-shell>
-      <pa-doctor-directory />
-    </pa-app-shell>
-  `,
+  templateUrl: './public-doctors-page.component.html',
 })
 export class PublicDoctorsPageComponent {}

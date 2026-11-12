@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/pacientes"
+method: POST
+headers:
+  Authorization: Bearer {{tokenMedico}}
+  Content-Type: application/json
+body:
+  type: text
+  content: "{}"
+scripts:
+  - type: afterResponse
+    code: pm.test("Responde 403", function () { pm.response.to.have.status(403); });
+    language: text/javascript
+order: 4000

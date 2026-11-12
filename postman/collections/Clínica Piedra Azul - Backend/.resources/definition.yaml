@@ -1,0 +1,7 @@
+$kind: collection
+description: ""
+variables:
+  baseUrl: http://localhost:5000
+  tokenAdmin: ""
+  tokenPaciente: ""
+  tokenMedico: ""

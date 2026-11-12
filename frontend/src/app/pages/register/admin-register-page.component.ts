@@ -6,11 +6,7 @@ import { UserRegistrationFormComponent } from '../../shared/organisms/user-regis
   selector: 'pa-admin-register-page',
   standalone: true,
   imports: [AppShellComponent, UserRegistrationFormComponent],
-  template: `
-    <pa-app-shell>
-      <pa-user-registration-form [adminMode]="true" />
-    </pa-app-shell>
-  `,
+  templateUrl: './admin-register-page.component.html',
 })
 export class AdminRegisterPageComponent {
 }

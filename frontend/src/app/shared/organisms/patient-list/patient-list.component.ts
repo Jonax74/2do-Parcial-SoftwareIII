@@ -9,33 +9,8 @@ import { TableSectionComponent } from '../../molecules/table-section/table-secti
   selector: 'pa-patient-list',
   standalone: true,
   imports: [ButtonComponent, RouterLink, TableSectionComponent],
-  template: `
-    <section class="page-intro">
-      <div>
-        <span class="eyebrow">Área administrativa</span>
-        <h1>Pacientes</h1>
-        <p>Consulta la información registrada para brindar una atención coordinada y segura.</p>
-      </div>
-      <a class="action-link" routerLink="/admin/pacientes/nuevo">Registrar paciente <span aria-hidden="true">＋</span></a>
-    </section>
-
-    @if (loading) {
-      <p class="status" role="status">Cargando pacientes…</p>
-    } @else if (errorMessage) {
-      <p class="status error" role="alert">{{ errorMessage }}</p>
-      <pa-button variant="secondary" (click)="loadPatients()">Intentar de nuevo</pa-button>
-    } @else {
-      <pa-table-section
-        title="Pacientes registrados"
-        description="Información confidencial disponible únicamente para el equipo autorizado."
-        eyebrow="Directorio clínico"
-        [columns]="columns"
-        [rows]="rows"
-        emptyMessage="Aún no hay pacientes registrados."
-      />
-    }
-  `,
-  styleUrl: './patient-list.component.scss',
+  templateUrl: './patient-list.component.html',
+  styleUrl: './patient-list.component.css',
 })
 export class PatientListComponent implements OnInit {
   protected loading = true;

@@ -6,10 +6,6 @@ import { AppointmentDashboardComponent } from '../../shared/organisms/appointmen
   selector: 'pa-admin-appointments-page',
   standalone: true,
   imports: [AppShellComponent, AppointmentDashboardComponent],
-  template: `
-    <pa-app-shell>
-      <pa-appointment-dashboard [adminMode]="true" />
-    </pa-app-shell>
-  `,
+  templateUrl: './admin-appointments-page.component.html',
 })
 export class AdminAppointmentsPageComponent {}

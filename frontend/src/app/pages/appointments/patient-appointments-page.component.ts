@@ -6,10 +6,6 @@ import { AppointmentDashboardComponent } from '../../shared/organisms/appointmen
   selector: 'pa-patient-appointments-page',
   standalone: true,
   imports: [AppShellComponent, AppointmentDashboardComponent],
-  template: `
-    <pa-app-shell>
-      <pa-appointment-dashboard />
-    </pa-app-shell>
-  `,
+  templateUrl: './patient-appointments-page.component.html',
 })
 export class PatientAppointmentsPageComponent {}

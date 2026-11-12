@@ -6,11 +6,7 @@ import { AppShellComponent } from '../../shared/templates/app-shell/app-shell.co
   selector: 'pa-admin-patients-page',
   standalone: true,
   imports: [AppShellComponent, PatientListComponent],
-  template: `
-    <pa-app-shell>
-      <pa-patient-list />
-    </pa-app-shell>
-  `,
+  templateUrl: './admin-patients-page.component.html',
 })
 export class AdminPatientsPageComponent {
 }

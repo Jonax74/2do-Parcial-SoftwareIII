@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/citas"
+method: GET
+headers:
+  Authorization: Bearer {{tokenMedico}}
+scripts:
+  - type: afterResponse
+    code: pm.test("Responde 403", function () { pm.response.to.have.status(403); });
+    language: text/javascript
+order: 6000

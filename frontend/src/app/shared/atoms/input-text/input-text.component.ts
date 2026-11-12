@@ -6,19 +6,8 @@ import { DigitsOnlyDirective } from '../../directives/digits-only.directive';
   selector: 'pa-input-text',
   standalone: true,
   imports: [DigitsOnlyDirective, ReactiveFormsModule],
-  template: `
-    <input
-      [id]="inputId"
-      [type]="type"
-      [placeholder]="placeholder"
-      [autocomplete]="autocomplete"
-      [attr.maxlength]="maxLength ?? null"
-      [attr.inputmode]="inputMode ?? null"
-      [paDigitsOnly]="digitsOnly"
-      [formControl]="control"
-    />
-  `,
-  styleUrl: './input-text.component.scss',
+  templateUrl: './input-text.component.html',
+  styleUrl: './input-text.component.css',
 })
 export class InputTextComponent {
   @Input({ required: true }) inputId = '';

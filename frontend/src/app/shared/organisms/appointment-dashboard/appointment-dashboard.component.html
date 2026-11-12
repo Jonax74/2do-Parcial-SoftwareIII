@@ -1,0 +1,100 @@
+<section class="page-intro">
+  <div>
+    <span class="eyebrow">{{ adminMode ? 'Área administrativa' : 'Portal del paciente' }}</span>
+    <h1>{{ adminMode ? 'Gestión de citas' : 'Mis citas médicas' }}</h1>
+    <p>{{ adminMode
+      ? 'Programa nuevas consultas y revisa la agenda de todos los pacientes.'
+      : 'Aquí puedes consultar las citas asociadas a tu cuenta.' }}</p>
+  </div>
+  @if (adminMode) {
+    <pa-button (click)="showForm = !showForm">
+      {{ showForm ? 'Cerrar formulario' : 'Crear cita' }}
+    </pa-button>
+  }
+</section>
+
+@if (adminMode && showForm) {
+  <section class="form-card">
+    <span class="eyebrow">Agenda clínica</span>
+    <h2>Programar una cita</h2>
+    @if (optionsError) {
+      <p class="form-error" role="alert">{{ optionsError }}</p>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="create()" novalidate>
+        <label>
+          Paciente
+          <select formControlName="pacienteId">
+            <option value="">Selecciona un paciente</option>
+            @for (patient of patients; track patient.id) {
+              <option [value]="patient.id">{{ patient.nombre }} · {{ patient.documento }}</option>
+            }
+          </select>
+          @if (form.controls.pacienteId.touched && form.controls.pacienteId.invalid) {
+            <small class="field-error">Selecciona un paciente.</small>
+          }
+        </label>
+        <label>
+          Médico
+          <select formControlName="medicoId">
+            <option value="">Selecciona un médico</option>
+            @for (doctor of doctors; track doctor.id) {
+              <option [value]="doctor.id">{{ doctor.nombre }} · {{ doctor.especialidad }}</option>
+            }
+          </select>
+          @if (form.controls.medicoId.touched && form.controls.medicoId.invalid) {
+            <small class="field-error">Selecciona un médico.</small>
+          }
+        </label>
+        <label>
+          Fecha y hora
+          <input type="datetime-local" formControlName="fechaHora" />
+          @if (form.controls.fechaHora.touched && form.controls.fechaHora.invalid) {
+            <small class="field-error">Elige una fecha futura.</small>
+          }
+        </label>
+        <label>
+          Motivo de consulta
+          <textarea rows="3" minlength="5" maxlength="500" formControlName="motivo" placeholder="Describe brevemente el motivo"></textarea>
+          @if (form.controls.motivo.touched && form.controls.motivo.invalid) {
+            <small class="field-error">
+              @if (form.controls.motivo.hasError('blank') || form.controls.motivo.hasError('required')) {
+                El motivo es obligatorio.
+              } @else if (form.controls.motivo.hasError('minlength')) {
+                El motivo debe tener al menos 5 caracteres.
+              } @else {
+                El motivo no puede superar 500 caracteres.
+              }
+            </small>
+          }
+        </label>
+        @if (formError) {
+          <p class="form-error" role="alert">{{ formError }}</p>
+        }
+        @if (formSuccess) {
+          <p class="form-success" role="status">{{ formSuccess }}</p>
+        }
+        <pa-button type="submit" [disabled]="saving">
+          {{ saving ? 'Guardando…' : 'Confirmar cita' }}
+        </pa-button>
+      </form>
+    }
+  </section>
+}
+
+@if (loading) {
+  <p class="status" role="status">Cargando citas…</p>
+} @else if (errorMessage) {
+  <p class="status error" role="alert">{{ errorMessage }}</p>
+  <pa-button variant="secondary" (click)="loadAppointments()">Intentar de nuevo</pa-button>
+} @else {
+  <pa-table-section
+    [eyebrow]="adminMode ? 'Agenda institucional' : 'Atención médica'"
+    [title]="adminMode ? 'Citas registradas' : 'Próximas consultas'"
+    [description]="adminMode
+      ? 'Agenda ordenada por fecha y hora de atención.'
+      : 'Las citas mostradas pertenecen a tu usuario autenticado.'"
+    [columns]="columns"
+    [rows]="rows"
+    emptyMessage="No hay citas para mostrar."
+  />
+}

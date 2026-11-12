@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/pacientes"
+method: GET
+headers:
+  Authorization: Bearer {{tokenMedico}}
+scripts:
+  - type: afterResponse
+    code: pm.test("Responde 200", function () { pm.response.to.have.status(200); });
+    language: text/javascript
+order: 2000
