@@ -88,6 +88,29 @@ form > pa-button {
   line-height: 1.55;
 }
 
+.return-link {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(110deg, var(--color-primary-light), var(--color-primary));
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.return-link:hover {
+  background: linear-gradient(110deg, var(--color-primary), var(--color-primary-dark));
+  box-shadow: 0 7px 18px rgb(37 91 172 / 24%);
+  transform: translateY(-1px);
+}
+
+.return-link:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
 .existing-account {
   margin: 1.3rem 0 0;
   color: var(--color-muted);

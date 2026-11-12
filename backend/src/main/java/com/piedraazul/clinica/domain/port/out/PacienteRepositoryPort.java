@@ -8,7 +8,7 @@ import com.piedraazul.clinica.domain.model.PacienteConUsuario;
 public interface PacienteRepositoryPort {
 	boolean existsByDocumento(String documento);
 
-	boolean existsById(Long pacienteId);
+	boolean lockById(Long pacienteId);
 
 	Paciente save(Paciente paciente);
 

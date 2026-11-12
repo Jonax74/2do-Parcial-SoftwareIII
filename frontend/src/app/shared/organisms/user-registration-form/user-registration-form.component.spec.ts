@@ -68,6 +68,8 @@ describe('UserRegistrationFormComponent', () => {
       }),
     );
     expect(fixture.nativeElement.textContent).toContain('se registró correctamente');
+    expect(fixture.nativeElement.querySelector('.return-link')?.getAttribute('href'))
+      .toBe('/admin/pacientes');
   });
 
   it('blocks registration when the document is already registered', async () => {

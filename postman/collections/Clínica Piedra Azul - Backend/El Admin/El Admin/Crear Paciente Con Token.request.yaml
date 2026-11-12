@@ -1,0 +1,21 @@
+$kind: http-request
+url: localhost:8080/api/admin/pacientes
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"nombre\": \"Carlos Gómez\",\r
+
+    \  \"correo\": \"carlos.gomez@ejemplo.com\",\r
+
+    \  \"password\": \"Clave1234\",\r
+
+    \  \"documento\": \"123456789\",\r
+
+    \  \"telefono\": \"3001234567\",\r
+
+    \  \"fechaNacimiento\": \"1995-05-20\"\r
+
+    }"
+order: 6000

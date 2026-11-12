@@ -11,6 +11,9 @@
 
   @if (successMessage) {
     <p class="success-message" role="status">{{ successMessage }}</p>
+    @if (patientOnly && adminMode) {
+      <a class="return-link" routerLink="/admin/pacientes">Regresar a pacientes</a>
+    }
   } @else {
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <div class="form-grid">

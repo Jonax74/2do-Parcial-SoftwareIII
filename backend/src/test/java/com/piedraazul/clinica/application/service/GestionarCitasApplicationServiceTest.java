@@ -3,6 +3,7 @@ package com.piedraazul.clinica.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.piedraazul.clinica.application.port.in.GestionarCitasUseCase.ComandoCrearCita;
+import com.piedraazul.clinica.domain.exception.HorarioCitaNoDisponibleException;
 import com.piedraazul.clinica.domain.exception.RecursoNoEncontradoException;
 import com.piedraazul.clinica.domain.model.Cita;
 import com.piedraazul.clinica.domain.model.CitaConDetalles;
@@ -38,8 +40,8 @@ class GestionarCitasApplicationServiceTest {
 	@Test
 	void createsAppointmentWhenPatientAndDoctorExist() {
 		Instant appointmentTime = Instant.now().plusSeconds(3600);
-		when(pacienteRepository.existsById(7L)).thenReturn(true);
-		when(medicoRepository.existsById(3L)).thenReturn(true);
+		when(pacienteRepository.lockById(7L)).thenReturn(true);
+		when(medicoRepository.lockById(3L)).thenReturn(true);
 		when(citaRepository.save(any())).thenAnswer(invocation -> {
 			Cita cita = invocation.getArgument(0);
 			return new Cita(11L, cita.pacienteId(), cita.medicoId(), cita.fechaHora(), cita.motivo(), cita.estado());
@@ -57,12 +59,46 @@ class GestionarCitasApplicationServiceTest {
 
 	@Test
 	void rejectsAppointmentForUnknownPatient() {
-		when(pacienteRepository.existsById(7L)).thenReturn(false);
+		when(pacienteRepository.lockById(7L)).thenReturn(false);
 
 		var service = new GestionarCitasApplicationService(
 				citaRepository, pacienteRepository, medicoRepository);
 		assertThrows(RecursoNoEncontradoException.class, () -> service.crear(
 				new ComandoCrearCita(7L, 3L, Instant.now().plusSeconds(3600), "Control")));
+	}
+
+	@Test
+	void rejectsAppointmentsWithinThirtyMinutesForTheSamePatient() {
+		Instant appointmentTime = Instant.now().plusSeconds(3600);
+		when(pacienteRepository.lockById(7L)).thenReturn(true);
+		when(medicoRepository.lockById(3L)).thenReturn(true);
+		when(citaRepository.existsProgrammedForPatientBetween(
+				any(), any(), any())).thenReturn(true);
+
+		var service = new GestionarCitasApplicationService(
+				citaRepository, pacienteRepository, medicoRepository);
+
+		assertThrows(HorarioCitaNoDisponibleException.class, () -> service.crear(
+				new ComandoCrearCita(7L, 3L, appointmentTime, "Control")));
+		verify(citaRepository, never()).save(any());
+	}
+
+	@Test
+	void rejectsAppointmentsWithinThirtyMinutesForTheSameDoctor() {
+		Instant appointmentTime = Instant.now().plusSeconds(3600);
+		when(pacienteRepository.lockById(7L)).thenReturn(true);
+		when(medicoRepository.lockById(3L)).thenReturn(true);
+		when(citaRepository.existsProgrammedForPatientBetween(
+				any(), any(), any())).thenReturn(false);
+		when(citaRepository.existsProgrammedForDoctorBetween(
+				any(), any(), any())).thenReturn(true);
+
+		var service = new GestionarCitasApplicationService(
+				citaRepository, pacienteRepository, medicoRepository);
+
+		assertThrows(HorarioCitaNoDisponibleException.class, () -> service.crear(
+				new ComandoCrearCita(7L, 3L, appointmentTime, "Control")));
+		verify(citaRepository, never()).save(any());
 	}
 
 	@Test

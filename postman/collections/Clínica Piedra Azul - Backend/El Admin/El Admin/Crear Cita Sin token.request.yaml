@@ -1,0 +1,17 @@
+$kind: http-request
+url: http://localhost:8080/api/admin/citas
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"pacienteId\": 1,\r
+
+    \  \"medicoId\": 1,\r
+
+    \  \"fechaHora\": \"2027-01-15T14:30:00Z\",\r
+
+    \  \"motivo\": \"Consulta de control\"\r
+
+    }"
+order: 3000

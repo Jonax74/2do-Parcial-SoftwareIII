@@ -166,6 +166,89 @@ class AuthFlowIntegrationTest {
 				.andExpect(jsonPath("$[0].medicoNombre").value("Dr. Juan Ruiz"));
 	}
 
+	@Test
+	void preventsAppointmentsWithinThirtyMinutesForTheSamePatientOrDoctor() throws Exception {
+		String adminToken = administratorToken();
+		String patientOneEmail = "slot-patient-one-" + UUID.randomUUID() + "@example.com";
+		String patientTwoEmail = "slot-patient-two-" + UUID.randomUUID() + "@example.com";
+		String patientOneDocument = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
+		String patientTwoDocument = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
+		registerPatient(adminToken, patientOneEmail, patientOneDocument);
+		registerPatient(adminToken, patientTwoEmail, patientTwoDocument);
+		long patientOneId = findPatientId(patientOneEmail);
+		long patientTwoId = findPatientId(patientTwoEmail);
+
+		String doctorOneEmail = "slot-doctor-one-" + UUID.randomUUID() + "@example.com";
+		String doctorTwoEmail = "slot-doctor-two-" + UUID.randomUUID() + "@example.com";
+		long doctorOneId = registerDoctor(adminToken, doctorOneEmail);
+		long doctorTwoId = registerDoctor(adminToken, doctorTwoEmail);
+
+		java.time.Instant appointmentTime = java.time.Instant.now().plusSeconds(7200);
+		createAppointment(adminToken, patientOneId, doctorOneId, appointmentTime, 201);
+		createAppointment(adminToken, patientOneId, doctorTwoId, appointmentTime.plusSeconds(15 * 60), 409);
+		createAppointment(adminToken, patientTwoId, doctorOneId, appointmentTime.plusSeconds(15 * 60), 409);
+		createAppointment(adminToken, patientOneId, doctorOneId, appointmentTime, 409);
+
+		createAppointment(adminToken, patientOneId, doctorTwoId, appointmentTime.plusSeconds(30 * 60), 201);
+		createAppointment(adminToken, patientTwoId, doctorOneId, appointmentTime.plusSeconds(30 * 60), 201);
+	}
+
+	private void registerPatient(String adminToken, String email, String document) throws Exception {
+		mockMvc.perform(post("/api/admin/pacientes")
+						.header("Authorization", adminToken)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(patientRequest(email, document)))
+				.andExpect(status().isCreated());
+	}
+
+	private long findPatientId(String email) {
+		return pacienteRepository.findAllWithUsuario().stream()
+				.filter(patient -> email.equals(patient.correo()))
+				.findFirst()
+				.orElseThrow()
+				.pacienteId();
+	}
+
+	private long registerDoctor(String adminToken, String email) throws Exception {
+		mockMvc.perform(post("/api/admin/medicos")
+						.header("Authorization", adminToken)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "nombre":"Dra. Ana Pérez",
+								  "especialidad":"Medicina general",
+								  "correo":"%s",
+								  "telefono":"3001234567"
+								}
+								""".formatted(email)))
+				.andExpect(status().isCreated());
+		return medicoRepository.findAll().stream()
+				.filter(doctor -> email.equals(doctor.correo()))
+				.mapToLong(com.piedraazul.clinica.domain.model.Medico::id)
+				.findFirst()
+				.orElseThrow();
+	}
+
+	private void createAppointment(
+			String adminToken,
+			long patientId,
+			long doctorId,
+			java.time.Instant appointmentTime,
+			int expectedStatus) throws Exception {
+		mockMvc.perform(post("/api/admin/citas")
+						.header("Authorization", adminToken)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "pacienteId":%d,
+								  "medicoId":%d,
+								  "fechaHora":"%s",
+								  "motivo":"Control"
+								}
+								""".formatted(patientId, doctorId, appointmentTime)))
+				.andExpect(status().is(expectedStatus));
+	}
+
 	private String patientRequest(String email, String document) {
 		return """
 				{

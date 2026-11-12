@@ -7,7 +7,7 @@ import com.piedraazul.clinica.domain.model.Medico;
 public interface MedicoRepositoryPort {
 	boolean existsByCorreo(String correo);
 
-	boolean existsById(Long medicoId);
+	boolean lockById(Long medicoId);
 
 	Medico save(Medico medico);
 

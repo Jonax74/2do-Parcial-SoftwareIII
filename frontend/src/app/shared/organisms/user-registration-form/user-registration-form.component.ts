@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   AsyncValidatorFn,
   FormControl,
@@ -29,7 +30,7 @@ type RegistrationFormValue = {
 @Component({
   selector: 'pa-user-registration-form',
   standalone: true,
-  imports: [ButtonComponent, FormFieldComponent, ReactiveFormsModule],
+  imports: [ButtonComponent, FormFieldComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './user-registration-form.component.html',
   styleUrl: './user-registration-form.component.css',
 })

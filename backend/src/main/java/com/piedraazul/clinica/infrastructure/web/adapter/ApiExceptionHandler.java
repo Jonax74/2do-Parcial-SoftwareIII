@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.piedraazul.clinica.domain.exception.CorreoYaRegistradoException;
 import com.piedraazul.clinica.domain.exception.CredencialesInvalidasException;
 import com.piedraazul.clinica.domain.exception.DocumentoYaRegistradoException;
+import com.piedraazul.clinica.domain.exception.HorarioCitaNoDisponibleException;
 import com.piedraazul.clinica.domain.exception.RecursoNoEncontradoException;
 import com.piedraazul.clinica.infrastructure.web.dto.ApiErrorResponse;
 
@@ -30,6 +31,11 @@ public class ApiExceptionHandler {
 
 	@ExceptionHandler({ CorreoYaRegistradoException.class, DocumentoYaRegistradoException.class })
 	public ResponseEntity<ApiErrorResponse> duplicateRegistration(RuntimeException exception) {
+		return error(HttpStatus.CONFLICT, exception.getMessage());
+	}
+
+	@ExceptionHandler(HorarioCitaNoDisponibleException.class)
+	public ResponseEntity<ApiErrorResponse> appointmentConflict(HorarioCitaNoDisponibleException exception) {
 		return error(HttpStatus.CONFLICT, exception.getMessage());
 	}
 

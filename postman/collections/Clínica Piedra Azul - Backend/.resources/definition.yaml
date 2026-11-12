@@ -1,7 +1,18 @@
 $kind: collection
 description: ""
 variables:
-  baseUrl: http://localhost:5000
-  tokenAdmin: ""
-  tokenPaciente: ""
-  tokenMedico: ""
+  - key: baseUrl
+    value: http://localhost:5000
+    disabled: false
+  - key: tokenAdmin
+    value: ""
+    disabled: false
+  - key: tokenPaciente
+    value: ""
+    disabled: false
+  - key: tokenMedico
+    value: ""
+    disabled: false
+  - key: json_web_token_182j
+    secret: true
+    disabled: false

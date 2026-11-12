@@ -30,8 +30,8 @@ public class PacienteRepositoryAdapter implements PacienteRepositoryPort {
 	}
 
 	@Override
-	public boolean existsById(Long pacienteId) {
-		return pacienteRepository.existsById(pacienteId);
+	public boolean lockById(Long pacienteId) {
+		return pacienteRepository.findByIdForUpdate(pacienteId).isPresent();
 	}
 
 	@Override

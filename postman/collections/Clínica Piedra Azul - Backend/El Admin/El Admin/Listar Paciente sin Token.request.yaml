@@ -1,0 +1,8 @@
+$kind: http-request
+url: localhost:8080/api/admin/pacientes
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_182j}}"
+order: 8000

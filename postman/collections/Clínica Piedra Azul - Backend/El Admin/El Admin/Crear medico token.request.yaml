@@ -1,0 +1,21 @@
+$kind: http-request
+url: http://localhost:8080/api/admin/medicos
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"nombre\": \"Dra. Ana Pérez\",\r
+
+    \  \"especialidad\": \"Cardiología\",\r
+
+    \  \"correo\": \"ana.perez@clinica.com\",\r
+
+    \  \"telefono\": \"3001234567\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_182j}}"
+order: 1884

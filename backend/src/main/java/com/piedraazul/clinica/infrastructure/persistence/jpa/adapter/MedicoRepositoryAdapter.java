@@ -24,8 +24,8 @@ public class MedicoRepositoryAdapter implements MedicoRepositoryPort {
 	}
 
 	@Override
-	public boolean existsById(Long medicoId) {
-		return medicoRepository.existsById(medicoId);
+	public boolean lockById(Long medicoId) {
+		return medicoRepository.findByIdForUpdate(medicoId).isPresent();
 	}
 
 	@Override

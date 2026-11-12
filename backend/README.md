@@ -61,6 +61,10 @@ La API escucha en `http://localhost:8080`. La conexión se puede cambiar mediant
 | `POST /api/admin/usuarios` | Administrador | Registra otro administrador o un paciente |
 | `GET /api/admin/pacientes` | Administrador | Devuelve el listado administrativo |
 
+Las citas programadas deben tener al menos 30 minutos de separación para el mismo paciente y
+para el mismo médico. Una diferencia exacta de 30 minutos está permitida; las citas canceladas no
+bloquean el horario.
+
 El registro de pacientes requiere una sesión administrativa y siempre asigna el rol `PACIENTE`.
 La creación de administradores requiere una sesión administrativa. Para crear el primero, se usa
 el bootstrap por variables de entorno. Los correos se normalizan y se rechazan duplicados; la

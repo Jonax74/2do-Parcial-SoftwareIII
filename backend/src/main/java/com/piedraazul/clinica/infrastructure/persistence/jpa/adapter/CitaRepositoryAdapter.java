@@ -1,11 +1,13 @@
 package com.piedraazul.clinica.infrastructure.persistence.jpa.adapter;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
 import com.piedraazul.clinica.domain.model.Cita;
 import com.piedraazul.clinica.domain.model.CitaConDetalles;
+import com.piedraazul.clinica.domain.model.EstadoCita;
 import com.piedraazul.clinica.domain.port.out.CitaRepositoryPort;
 import com.piedraazul.clinica.infrastructure.persistence.jpa.entity.CitaJpaEntity;
 import com.piedraazul.clinica.infrastructure.persistence.jpa.repository.SpringDataCitaJpaRepository;
@@ -37,6 +39,18 @@ public class CitaRepositoryAdapter implements CitaRepositoryPort {
 				cita.motivo(),
 				cita.estado());
 		return citaRepository.save(entity).toDomain();
+	}
+
+	@Override
+	public boolean existsProgrammedForPatientBetween(Long pacienteId, Instant start, Instant end) {
+		return citaRepository.existsByPaciente_IdAndEstadoAndFechaHoraGreaterThanAndFechaHoraLessThan(
+				pacienteId, EstadoCita.PROGRAMADA, start, end);
+	}
+
+	@Override
+	public boolean existsProgrammedForDoctorBetween(Long medicoId, Instant start, Instant end) {
+		return citaRepository.existsByMedico_IdAndEstadoAndFechaHoraGreaterThanAndFechaHoraLessThan(
+				medicoId, EstadoCita.PROGRAMADA, start, end);
 	}
 
 	@Override
